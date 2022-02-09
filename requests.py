@@ -7,7 +7,7 @@ def get_prefix():
     return """
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix dbo: <http://dbpedia.org/ontology/>
-    prefix dbo: <http://dbpedia.org/property/>
+    prefix dbp: <http://dbpedia.org/property/>
     """
 
 def get_film_from(director, split=True):
