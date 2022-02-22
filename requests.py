@@ -1,6 +1,9 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 import json
 
+def pprint(dict):
+    print(print(json.dumps(dict, indent=4, sort_keys=True)))
+
 def get_sparql():
     return SPARQLWrapper("http://query.wikidata.org/sparql")
 
@@ -10,6 +13,7 @@ def get_prefix():
     PREFIX wdt: <http://www.wikidata.org/prop/direct/>
     PREFIX wikibase: <http://wikiba.se/ontology#>
     PREFIX bd: <http://www.bigdata.com/rdf#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     """
 
 def search(variable, target):
@@ -28,21 +32,29 @@ def search(variable, target):
 def get_film(title=None, director=None, actor=None):
     query = f"""
     {get_prefix()}    
-    SELECT ?film ?filmLabel ?director ?directorLabel ?actor ?actorLabel
+    SELECT ?filmLabel ?directorLabel 
+           (GROUP_CONCAT(DISTINCT ?actorLabel; separator=", ") as ?actorsLabel)
     WHERE {{
         ?film wdt:P57 ?director ;
               wdt:P161 ?actor .
-        SERVICE wikibase:label {{ bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }}
+        SERVICE wikibase:label {{
+            bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en".
+            ?film rdfs:label ?filmLabel .
+            ?director rdfs:label ?directorLabel .
+            ?actor rdfs:label ?actorLabel .
+        }}
         {search('?film', title)}
         {search('?director', director)} 
         {search('?actor', actor)} 
-    }} LIMIT 100
+    }}
+    GROUP BY ?filmLabel ?directorLabel
+    LIMIT 100
     """
     print(query)
     sp = get_sparql()
     sp.setQuery(query)
     sp.setReturnFormat(JSON)
-    results = sp.query().convert()
-    print(json.dumps(results, indent=4, sort_keys=True))
+    return sp.query().convert()['results']['bindings']
 
-print(get_film(title='inception'))
+res = get_film(title='dark knight')
+pprint(res)
