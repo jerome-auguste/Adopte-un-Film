@@ -14,6 +14,7 @@ def get_prefix():
     PREFIX wikibase: <http://wikiba.se/ontology#>
     PREFIX bd: <http://www.bigdata.com/rdf#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     """
 
 def search(variable, target):
@@ -29,16 +30,17 @@ def search(variable, target):
     }}
     """
 
-def get_film(title=None, director=None, actor=None, genre=None):
+def get_film(title=None, director=None, actor=None, genre=None, score=0):
     query = f"""
     {get_prefix()}    
-    SELECT ?filmLabel ?directorLabel 
+    SELECT ?filmLabel ?directorLabel ?score
            (GROUP_CONCAT(DISTINCT ?actorLabel; separator=", ") as ?actorsLabel)
            (GROUP_CONCAT(DISTINCT ?genreLabel; separator=", ") as ?genresLabel)
     WHERE {{
         ?film wdt:P57 ?director ;
               wdt:P161 ?actor ;
-              wdt:P136 ?genre .
+              wdt:P136 ?genre ;
+              wdt:P444 ?brutScore .
         SERVICE wikibase:label {{
             bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en".
             ?film rdfs:label ?filmLabel .
@@ -49,9 +51,12 @@ def get_film(title=None, director=None, actor=None, genre=None):
         {search('?film', title)}
         {search('?director', director)} 
         {search('?actor', actor)}
-        {search('?genre', genre)} 
+        {search('?genre', genre)}
+        FILTER regex(?brutScore, "^[0-9]+%$")
+        BIND(REPLACE(?brutScore, "%$", "") AS ?score)
+        FILTER (xsd:integer(?score) >= {score})
     }}
-    GROUP BY ?filmLabel ?directorLabel
+    GROUP BY ?filmLabel ?directorLabel ?score
     LIMIT 100
     """
     print(query)
@@ -60,5 +65,5 @@ def get_film(title=None, director=None, actor=None, genre=None):
     sp.setReturnFormat(JSON)
     return sp.query().convert()['results']['bindings']
 
-res = get_film(director='nolan')
+res = get_film(director='nolan', score=90)
 pprint(res)
