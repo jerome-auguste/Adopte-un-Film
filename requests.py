@@ -30,12 +30,22 @@ def search(variable, target):
     }}
     """
 
+def format(res_list):
+    return [
+        {
+            key: elm[key]['value'].split(";") if "List" in key
+            else elm[key]['value']
+            for key in elm
+        } 
+        for elm in res_list
+    ]
+
 def get_film(title=None, director=None, actor=None, genre=None, score=0):
     query = f"""
     {get_prefix()}    
     SELECT ?film ?filmLabel ?directorLabel ?score
-           (GROUP_CONCAT(DISTINCT ?actorLabel; separator=", ") as ?actorsLabel)
-           (GROUP_CONCAT(DISTINCT ?genreLabel; separator=", ") as ?genresLabel)
+           (GROUP_CONCAT(DISTINCT ?actorLabel; separator=";") as ?actorsList)
+           (GROUP_CONCAT(DISTINCT ?genreLabel; separator=";") as ?genresList)
     WHERE {{
         ?film wdt:P57 ?director ;
               wdt:P161 ?actor ;
@@ -63,7 +73,7 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
     sp = get_sparql()
     sp.setQuery(query)
     sp.setReturnFormat(JSON)
-    return sp.query().convert()['results']['bindings']
+    return format(sp.query().convert()['results']['bindings'])
 
 res = get_film(director='nolan', score=90)
 pprint(res)
