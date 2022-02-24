@@ -30,17 +30,30 @@ def search(variable, target):
     }}
     """
 
+def format(res_list):
+    return [
+        {
+            key: elm[key]['value'].split(";") if "List" in key
+            else elm[key]['value']
+            for key in elm
+        } 
+        for elm in res_list
+    ]
+
 def get_film(title=None, director=None, actor=None, genre=None, score=0):
     query = f"""
     {get_prefix()}    
-    SELECT ?filmLabel ?directorLabel ?score
-           (GROUP_CONCAT(DISTINCT ?actorLabel; separator=", ") as ?actorsLabel)
-           (GROUP_CONCAT(DISTINCT ?genreLabel; separator=", ") as ?genresLabel)
+    SELECT ?film ?filmLabel ?directorLabel ?score
+           (SAMPLE(?poster) as ?poster)
+           (GROUP_CONCAT(DISTINCT ?actorLabel; separator=";") as ?actorsList)
+           (GROUP_CONCAT(DISTINCT ?genreLabel; separator=";") as ?genresList)
     WHERE {{
         ?film wdt:P57 ?director ;
               wdt:P161 ?actor ;
               wdt:P136 ?genre ;
               wdt:P444 ?brutScore .
+        OPTIONAL {{?film wdt:P3383 ?poster }}
+        OPTIONAL {{?film wdt:P18 ?poster }}
         SERVICE wikibase:label {{
             bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en".
             ?film rdfs:label ?filmLabel .
@@ -56,14 +69,14 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
         BIND(REPLACE(?brutScore, "%$", "") AS ?score)
         FILTER (xsd:integer(?score) >= {score})
     }}
-    GROUP BY ?filmLabel ?directorLabel ?score
+    GROUP BY ?film ?filmLabel ?directorLabel ?score
     LIMIT 100
     """
     print(query)
     sp = get_sparql()
     sp.setQuery(query)
     sp.setReturnFormat(JSON)
-    return sp.query().convert()['results']['bindings']
+    return format(sp.query().convert()['results']['bindings'])
 
 res = get_film(director='nolan', score=90)
 pprint(res)
