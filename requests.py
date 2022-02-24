@@ -44,6 +44,7 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
     query = f"""
     {get_prefix()}    
     SELECT ?film ?filmLabel ?directorLabel ?score
+           (SAMPLE(?poster) as ?poster)
            (GROUP_CONCAT(DISTINCT ?actorLabel; separator=";") as ?actorsList)
            (GROUP_CONCAT(DISTINCT ?genreLabel; separator=";") as ?genresList)
     WHERE {{
@@ -51,6 +52,8 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
               wdt:P161 ?actor ;
               wdt:P136 ?genre ;
               wdt:P444 ?brutScore .
+        OPTIONAL {{?film wdt:P3383 ?poster }}
+        OPTIONAL {{?film wdt:P18 ?poster }}
         SERVICE wikibase:label {{
             bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en".
             ?film rdfs:label ?filmLabel .
