@@ -10,4 +10,4 @@ Design a movie request interface using the rdf based IMDB. Then try to design a 
     - But more information on Wikidata (genre, rating, ...)
     - We should be able to link both with owl:sameAs.
     - Federated Quey are disabled on DBPedia, so we cannot run a conjoined search on both endpoint at the same time :(
-    - Finally : mwapi allow efficient text search/filter on wikidata.
+    - Finally : mwapi allow efficient text search on wikidata. *Warning* : it is NOT a text filter like regex, but more of an indexed search like Google (that's probably why it doesn't time out). It may not match anything for a standard word like 'the', or a name like 'scott', but will find matches for more specific strings like 'ridley scott' or 'nolan'.
