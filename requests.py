@@ -33,7 +33,7 @@ def search(variable, target):
 def get_film(title=None, director=None, actor=None, genre=None, score=0):
     query = f"""
     {get_prefix()}    
-    SELECT ?filmLabel ?directorLabel ?score
+    SELECT ?film ?filmLabel ?directorLabel ?score
            (GROUP_CONCAT(DISTINCT ?actorLabel; separator=", ") as ?actorsLabel)
            (GROUP_CONCAT(DISTINCT ?genreLabel; separator=", ") as ?genresLabel)
     WHERE {{
@@ -56,7 +56,7 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
         BIND(REPLACE(?brutScore, "%$", "") AS ?score)
         FILTER (xsd:integer(?score) >= {score})
     }}
-    GROUP BY ?filmLabel ?directorLabel ?score
+    GROUP BY ?film ?filmLabel ?directorLabel ?score
     LIMIT 100
     """
     print(query)
