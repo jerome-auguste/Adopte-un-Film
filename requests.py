@@ -54,6 +54,7 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
               wdt:P444 ?brutScore .
         OPTIONAL {{?film wdt:P3383 ?poster }}
         OPTIONAL {{?film wdt:P18 ?poster }}
+        OPTIONAL {{?film wdt:P154 ?poster }}
         SERVICE wikibase:label {{
             bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en".
             ?film rdfs:label ?filmLabel .
