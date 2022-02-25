@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+{% extends 'bootstrap/base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Sparql Movies</title>
+</head>
+{%block content%}
+
+<body>
+    <header class="jumbotron p-5 text-center bg-image">
+        <h1 class="">Movies recommendation tool using Sparql</h1>
+    </header>
+
+    <div class="container my-5">
+        <form method="post" action="/">
+            <div class="row">
+                <div class="form-group m-2">
+                    <div class='col'>
+                        <div class= 'row'>
+                            <label for="field1">Field</label>
+                            <select class='form-control' name="field0">
+                                <option value="{{None}}" selected></option>
+                                {% for  option in env.available_fields%}
+                                <option value="{{option}}"> {{option}} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class= 'row'>
+                            <label for="value1">Value</label>
+                            <input type="text" class='form-control' name="value0" placeholder="">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group m-2">
+                    <div class='col'>
+                        <div class= 'row'>
+                            <label for="field1">Field</label>
+                            <select class='form-control' name="field1">
+                                <option value="{{None}}" selected></option>
+                                {% for  option in env.available_fields%}
+                                <option value="{{option}}"> {{option}} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class= 'row'>
+                            <label for="value1">Value</label>
+                            <input type="text" class='form-control' name="value1" placeholder="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="submit" class ='btn btn-primary' value="Search">
+        </form>
+    </div>
+
+    <div class="container-fluid">
+        <footer class="text-center text-lg-start text-white" style="background-color: #3e4551">
+            <div class="container p-4 pb-0">
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="text-uppercase">PROJECT INFORMATIONS</h5>
+                        <div class="align-bottom"> Developped by Jérôme Auguste, Nathan Bruckmann, Ruben Partouche</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="align-bottom"> Using Sparql endpoints : wikidata, dbpedia</div>
+                    </div>
+                </div>
+
+                <hr class="mb-4" />
+                <section class="mb-4 text-center">
+                    <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button">
+                        Github
+                    </a>
+                </section>
+            </div>
+        </footer>
+    </div>
+
+</body>
+{%endblock%}
+
+</html>
