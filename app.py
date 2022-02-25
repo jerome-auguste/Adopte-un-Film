@@ -6,6 +6,8 @@ from flask_bootstrap import Bootstrap
 from env import env
 import json
 import os
+from pprint import pprint
+from movie import Movie
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -20,7 +22,7 @@ def index():
         for i in range(0, env.num_fields_to_search):
             k = request.form.get(f'field{i}')
             v = request.form.get(f'value{i}')
-            if None not in [k, v]:
+            if None not in [k, v] and "" not in [k, v]:
                 data[k] = v
         return redirect(f'/search={json.dumps(data)}')
     return render_template('index.html', env=env)
@@ -28,18 +30,12 @@ def index():
 
 @app.route(f'/search=<data>')
 def search_2(data):
-    data = json.loads(data)
     print(data)
-    filtered = {}
-    for k, v in data.items():
-        if k not in env.available_fields:
-            pass
-        filtered[k] = v
-    res = get_film(**filtered)
-    resLabels = [data['filmLabel']['value'] for data in res]
-    return f"""<p>
-                    {ul_fromlist(resLabels)}
-                </p>"""
+    data = json.loads(data)
+    res = get_film(**data)
+    pprint(res)
+    res = [Movie(mov) for mov in res]
+    return render_template('movieList.html', movies=res)
 
 
 if __name__ == '__main__':
