@@ -66,8 +66,8 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
         {search('?actor', actor)}
         {search('?genre', genre)}
         FILTER regex(?brutScore, "^[0-9]+%$")
-        BIND(REPLACE(?brutScore, "%$", "") AS ?score)
-        FILTER (xsd:integer(?score) >= {score})
+        BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+        FILTER (?score >= {score})
     }}
     GROUP BY ?film ?filmLabel ?directorLabel ?score
     LIMIT 100
@@ -78,5 +78,37 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
-res = get_film(director='nolan', score=90)
+def recommendation(film, limit=20):
+    query = f"""
+    {get_prefix()}    
+    SELECT ?film ?filmLabel ?topicLabel ?score
+    WHERE {{
+    {{
+        SELECT ?topic
+        WHERE {{ {film} wdt:P921 ?topic . }}
+    }}
+    ?film wdt:P31 wd:Q11424 ;
+          wdt:P921 ?topic ;
+          wdt:P444 ?brutScore .
+    SERVICE wikibase:label {{
+        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
+        ?film rdfs:label ?filmLabel .
+        ?topic rdfs:label ?topicLabel .
+    }}
+    FILTER regex(?brutScore, "^[0-9]+%$")
+    BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+    FILTER (?score != 100)
+    FILTER(?film != {film})
+    }}
+    ORDER BY DESC(?score)
+    LIMIT {limit}
+    """
+    print(query)
+    sp = get_sparql()
+    sp.setQuery(query)
+    sp.setReturnFormat(JSON)
+    return format(sp.query().convert()['results']['bindings'])
+
+# res = get_film(director='nolan', score=90)
+res = recommendation('wd:Q163872', 2)
 pprint(res)
