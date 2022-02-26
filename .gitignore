@@ -131,4 +131,7 @@ dmypy.json
 
 requests_samples.txt
 
-static/*
+static/*.jpg
+static/*.JPG
+static/*.svg
+static/*.png
