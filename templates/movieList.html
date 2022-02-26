@@ -10,6 +10,7 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css">
     <title>Sparql Movies</title>
 </head>
 {%block content%}
@@ -18,38 +19,55 @@
     <header class="jumbotron p-5 text-center bg-image">
         <h1 class="">Movies recommendation tool using Sparql</h1>
     </header>
-    <div class = "col">
+    <div class = "container-fluid">
     {%for movie in movies%}
-        <div class = 'row'>
-            <div class = 'col'>
-                <span class = "row p-3 text-center">{{movie.title}}</span>
-                <span class = "row p-2 text-center">Director: {{movie.director}}</span>
+        <div class = 'row ml-4' style="height:400px;width:100%">
+            <div class = 'col container mr-6'>
+                <div class = "row">
+                    <h2 class = "row text-center text-uppercase font-weight-bold ml-10">{{movie.title}}</h2>
+                </div>
+                <h5 class = "row text-right">Director: {{movie.director}}</h5>
+                <h6 class = "row text-right">Genres:  </h6>{{tags_fromlist(movie.genres) | safe}}
+                <h6 class = "row text-right mt-2">Actors: {{p_fromlist(movie.actors) | safe}}</h6>
+                <h6 class = "row text-right">Score:</h6> {{score_bar(movie.score) | safe}}
+                <div class="row">
+                    <a href="{{movie.wikiurl}}" class="fa fa-search"><span class="label">wikidata</span></a>
+                    <br>
+                    <a href="#" class="fa fa-tablet"><span class="label">recommendations based on this movie</span></a>
+                </div>
+            </div>
+            <div class="col container" style="height:400px">
+                {% if movie.poster_internal_url %}
+                <img class="img-thumbnail rounded float-left"
+                    style="height:100%;max-width:100%;"
+                    src="{{url_for('static',filename=movie.poster_internal_url)}}"
+                    alt="{{movie.title}}_poster"/>
+                {% endif %}
             </div>
         </div>
+        <hr>
     {%endfor%}
     </div>
-    <div class="container-fluid">
-        <footer class="text-center text-lg-start text-white" style="background-color: #3e4551">
-            <div class="container p-4 pb-0">
-                <div class="row">
-                    <div class="col-8">
-                        <h5 class="text-uppercase">PROJECT INFORMATIONS</h5>
-                        <div class="align-bottom"> Developped by Jérôme Auguste, Nathan Bruckmann, Ruben Partouche</div>
-                    </div>
-                    <div class="col-4">
-                        <div class="align-bottom"> Using Sparql endpoints : wikidata, dbpedia</div>
-                    </div>
+    <footer class="text-center text-lg-start text-white" style="background-color: #3e4551">
+        <div class="container p-4 pb-0">
+            <div class="row">
+                <div class="col-8">
+                    <h5 class="text-uppercase">PROJECT INFORMATIONS</h5>
+                    <div class="align-bottom"> Developped by Jérôme Auguste, Nathan Bruckmann, Ruben Partouche</div>
                 </div>
-
-                <hr class="mb-4" />
-                <section class="mb-4 text-center">
-                    <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button">
-                        Github
-                    </a>
-                </section>
+                <div class="col-4">
+                    <div class="align-bottom"> Using Sparql endpoints : wikidata, dbpedia</div>
+                </div>
             </div>
-        </footer>
-    </div>
+
+            <hr class="mb-4" />
+            <section class="mb-4 text-center">
+                <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button">
+                    Github
+                </a>
+            </section>
+        </div>
+    </footer>
 
 </body>
 {%endblock%}

@@ -1,18 +1,25 @@
 # %%
-from flask import Flask, render_template, redirect, request
-from utils import ul_fromlist
-from requests import get_film
+from flask import Flask, render_template, redirect, request, url_for
+from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar
+from sparqlRequests import get_film
 from flask_bootstrap import Bootstrap
+from flask_fontawesome import FontAwesome
 from env import env
 import json
 import os
 from pprint import pprint
 from movie import Movie
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 bootstrap = Bootstrap(app)
+fontawesome = FontAwesome(app)
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
+
+app.jinja_env.globals.update(ul_fromlist=ul_fromlist)
+app.jinja_env.globals.update(p_fromlist=p_fromlist)
+app.jinja_env.globals.update(tags_fromlist=tags_fromlist)
+app.jinja_env.globals.update(score_bar=score_bar)
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -30,10 +37,8 @@ def index():
 
 @app.route(f'/search=<data>')
 def search_2(data):
-    print(data)
     data = json.loads(data)
     res = get_film(**data)
-    pprint(res)
     res = [Movie(mov) for mov in res]
     return render_template('movieList.html', movies=res)
 
