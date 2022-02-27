@@ -1,3 +1,5 @@
+from env import env
+
 
 def ul_fromlist(list):
     return '<ul>' + '<li>'+'<li>'.join(list) + '</ul>'
@@ -15,16 +17,16 @@ def tags_fromlist(list):
 
 
 def form(num):
+    options = ''.join(
+        [f"<option value='{opt}'> {opt} </option>" for opt in env.available_fields])
+
     return f"""<div class="form-group m-2">
                     <div class='col'>
                         <div class= 'row'>
-                            <label for="field{num}">Field</label>
-                            <select class='form-control' name="field{num}">""" +\
-        """<option value="{{None}}" selected></option>
-                                {% for  option in env.available_fields%}
-                                <option value="{{option}}"> {{option}} </option>
-                                {% endfor %}
-                            </select>
+                                <label for="field{num}">Field</label>
+                                <select class='form-control' name="field{num}">""" +\
+        """<option value="{{None}}" selected></option>""" + options +\
+        """</select>
                         </div>
                         <div class= 'row'> """ +\
         f"""<label for="value{num}">Value</label>
