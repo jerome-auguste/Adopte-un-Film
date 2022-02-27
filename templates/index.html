@@ -20,93 +20,13 @@
     </header>
 
     <div class="container my-5">
+        <a href='/increase' class='btn btn-primary'>Add field</a>
+        <a href='/decrease' class='btn btn-primary'>Remove field</a>
         <form method="post" action="/">
             <div class="row">
-                <div class="form-group m-2">
-                    <div class='col'>
-                        <div class= 'row'>
-                            <label for="field1">Field</label>
-                            <select class='form-control' name="field0">
-                                <option value="{{None}}" selected></option>
-                                {% for  option in env.available_fields%}
-                                <option value="{{option}}"> {{option}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class= 'row'>
-                            <label for="value1">Value</label>
-                            <input type="text" class='form-control' name="value0" placeholder="">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group m-2">
-                    <div class='col'>
-                        <div class= 'row'>
-                            <label for="field1">Field</label>
-                            <select class='form-control' name="field1">
-                                <option value="{{None}}" selected></option>
-                                {% for  option in env.available_fields%}
-                                <option value="{{option}}"> {{option}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class= 'row'>
-                            <label for="value1">Value</label>
-                            <input type="text" class='form-control' name="value1" placeholder="">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group m-2">
-                    <div class='col'>
-                        <div class= 'row'>
-                            <label for="field1">Field</label>
-                            <select class='form-control' name="field2">
-                                <option value="{{None}}" selected></option>
-                                {% for  option in env.available_fields%}
-                                <option value="{{option}}"> {{option}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class= 'row'>
-                            <label for="value1">Value</label>
-                            <input type="text" class='form-control' name="value2" placeholder="">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group m-2">
-                    <div class='col'>
-                        <div class= 'row'>
-                            <label for="field1">Field</label>
-                            <select class='form-control' name="field3">
-                                <option value="{{None}}" selected></option>
-                                {% for  option in env.available_fields%}
-                                <option value="{{option}}"> {{option}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class= 'row'>
-                            <label for="value1">Value</label>
-                            <input type="text" class='form-control' name="value3" placeholder="">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group m-2">
-                    <div class='col'>
-                        <div class= 'row'>
-                            <label for="field1">Field</label>
-                            <select class='form-control' name="field4">
-                                <option value="{{None}}" selected></option>
-                                {% for  option in env.available_fields%}
-                                <option value="{{option}}"> {{option}} </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class= 'row'>
-                            <label for="value1">Value</label>
-                            <input type="text" class='form-control' name="value4" placeholder="">
-                        </div>
-                    </div>
-                </div>
+                {% for i in num_forms%}
+                    {{form(i) | safe}}
+                {% endfor %}
             </div>
             <input type="submit" class ='btn btn-primary' value="Search">
         </form>

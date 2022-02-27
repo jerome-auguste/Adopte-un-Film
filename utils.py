@@ -14,6 +14,26 @@ def tags_fromlist(list):
     return strr
 
 
+def form(num):
+    return f"""<div class="form-group m-2">
+                    <div class='col'>
+                        <div class= 'row'>
+                            <label for="field{num}">Field</label>
+                            <select class='form-control' name="field{num}">""" +\
+        """<option value="{{None}}" selected></option>
+                                {% for  option in env.available_fields%}
+                                <option value="{{option}}"> {{option}} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class= 'row'> """ +\
+        f"""<label for="value{num}">Value</label>
+                            <input type="text" class='form-control' name="value{num}" placeholder="">
+                        </div>
+                    </div>
+                </div>"""
+
+
 def score_bar(value):
     return f"""<div class='progress'>
                     <div    class='progress-bar progress-bar-striped progress-bar-animated'

@@ -1,6 +1,6 @@
 # %%
 from flask import Flask, render_template, redirect, request, url_for
-from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar
+from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
 from sparqlRequests import get_film
 from flask_bootstrap import Bootstrap
 from flask_fontawesome import FontAwesome
@@ -20,6 +20,7 @@ app.jinja_env.globals.update(ul_fromlist=ul_fromlist)
 app.jinja_env.globals.update(p_fromlist=p_fromlist)
 app.jinja_env.globals.update(tags_fromlist=tags_fromlist)
 app.jinja_env.globals.update(score_bar=score_bar)
+app.jinja_env.globals.update(form=form)
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -32,7 +33,7 @@ def index():
             if None not in [k, v] and "" not in [k, v]:
                 data[k] = v
         return redirect(f'/search={json.dumps(data)}')
-    return render_template('index.html', env=env)
+    return render_template('index.html', env=env, num_forms=[i for i in range(env.num_fields_to_search)])
 
 
 @app.route(f'/search=<data>')
@@ -41,6 +42,18 @@ def search_2(data):
     res = get_film(**data)
     res = [Movie(mov) for mov in res]
     return render_template('movieList.html', movies=res)
+
+
+@app.route('/increase')
+def increase():
+    env.num_fields_to_search += 1
+    return redirect('/')
+
+
+@app.route('/decrease')
+def decrease():
+    env.num_fields_to_search -= 1
+    return redirect('/')
 
 
 if __name__ == '__main__':
