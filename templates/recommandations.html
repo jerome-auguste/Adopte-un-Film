@@ -20,7 +20,7 @@
         <h1 class="">Movies recommendation tool using Sparql</h1>
     </header>
     <div class = "container-fluid">
-    {%for movie in movies%}
+    {%for movie in main_movie%}
         <div class = 'row ml-4' style="height:400px;width:100%">
             <div class = 'col container mr-6'>
                 <div class = "row">
@@ -32,7 +32,7 @@
                 <h6 class = "row text-right">Score:</h6> {{score_bar(movie.score) | safe}}
                 <div class="row">
                     <a href="{{movie.wikiurl}}" class="btn btn-secondary m-2"><span class="label">wikidata</span></a>
-                    <a href="{{url_for('recommandation',movie=movie.to_json())}}" class="btn btn-secondary m-2">recommendations based on this movie</a>
+                    <a href="/recommandation={{movie.uri}}" class="btn btn-secondary m-2">recommendations based on this movie</a>
                     <i class="fa fa-wikipedia-w" aria-hidden="true"></i>
                 </div>
             </div>
@@ -47,6 +47,21 @@
         </div>
         <hr>
     {%endfor%}
+    </div>
+    <div class='card-columns m-4'>
+        {% for  movie in  movies%}
+            <div class ='card m-2' style='height:200px;width:420px;'>
+                <div class = 'card-body'>
+                    <h5 class = "card-title">{{movie.title}}</h5>
+                    <h6 class = "card-text">Topic: {{movie.topic}}</h6>
+                    <h6 class = "card-text">Score:</h6> {{score_bar(movie.score) | safe}}
+                </div>
+                <div class="card-footer align-items-center">
+                    <a href="{{movie.wikiurl}}" class="btn btn-secondary ml-1 mb-1"><span class="label">Wiki</span></a>
+                    <a href="{{url_for('recommandation',movie=movie.to_json())}}"  class="btn btn-secondary mr-1 mb-1">Similar movies</a>
+                </div>
+            </div>
+        {% endfor %}
     </div>
     <footer class="text-center text-lg-start text-white" style="background-color: #3e4551">
         <div class="container p-4 pb-0">

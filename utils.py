@@ -12,7 +12,7 @@ def p_fromlist(list):
 def tags_fromlist(list):
     strr = ''
     for tag in list:
-        strr += f"<button type='button' class='btn btn-outline-info mr-2'>{tag}</button>"
+        strr += f"<button type='button' class='btn btn-outline-info mr-2 mb-1'>{tag}</button>"
     return strr
 
 

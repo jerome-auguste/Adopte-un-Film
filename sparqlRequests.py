@@ -93,7 +93,7 @@ def recommendation(film, limit=20):
     WHERE {{
     {{
         SELECT ?topic
-        WHERE {{ {film} wdt:P921 ?topic . }}
+        WHERE {{ wd:{film} wdt:P921 ?topic . }}
     }}
     ?film wdt:P31 wd:Q11424 ;
           wdt:P921 ?topic ;
@@ -106,7 +106,7 @@ def recommendation(film, limit=20):
     FILTER regex(?brutScore, "^[0-9]+%$")
     BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
     FILTER (?score != 100)
-    FILTER(?film != {film})
+    FILTER(?film != wd:{film})
     }}
     ORDER BY DESC(?score)
     LIMIT {limit}
