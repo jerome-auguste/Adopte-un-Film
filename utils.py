@@ -36,7 +36,7 @@ def form(num):
                 </div>"""
 
 
-def score_bar(value):
+def score_bar(value, label=''):
     return f"""<div class='progress'>
                     <div    class='progress-bar progress-bar-striped progress-bar-animated'
                             role='progressbar'
@@ -44,6 +44,6 @@ def score_bar(value):
                             aria-valuemin='0'
                             aria-valuemax='100'
                             style='width: {value}%'>
-                    {value}%
+                    {label + value}%
                     </div>
                 </div>"""

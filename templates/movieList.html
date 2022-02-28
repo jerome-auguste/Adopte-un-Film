@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 {% extends 'bootstrap/base.html' %}
-{% import "bootstrap/wtf.html" as wtf %}
 
 <head>
     <!-- Required meta tags -->
@@ -21,7 +20,7 @@
     </header>
     <div class = "container-fluid">
     {%for movie in movies%}
-        <div class = 'row ml-4' style="height:400px;width:100%">
+        <div class = 'row ml-4' style="height:15%;width:100%">
             <div class = 'col container mr-6'>
                 <div class = "row">
                     <h2 class = "row text-center text-uppercase font-weight-bold ml-10">{{movie.title}}</h2>
@@ -36,7 +35,7 @@
                     <i class="fa fa-wikipedia-w" aria-hidden="true"></i>
                 </div>
             </div>
-            <div class="col container" style="height:400px">
+            <div class="col container" style="height:15%">
                 {% if movie.poster_internal_url %}
                 <img class="img-thumbnail rounded float-left"
                     style="height:100%;max-width:100%;"

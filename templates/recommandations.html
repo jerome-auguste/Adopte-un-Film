@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 {% extends 'bootstrap/base.html' %}
-{% import "bootstrap/wtf.html" as wtf %}
 
 <head>
     <!-- Required meta tags -->
@@ -21,7 +20,7 @@
     </header>
     <div class = "container-fluid">
     {%for movie in main_movie%}
-        <div class = 'row ml-4' style="height:400px;width:100%">
+        <div class = 'row ml-4' style="height:15%;width:100%">
             <div class = 'col container mr-6'>
                 <div class = "row">
                     <h2 class = "row text-center text-uppercase font-weight-bold ml-10">{{movie.title}}</h2>
@@ -29,14 +28,14 @@
                 <h5 class = "row text-right">{{movie.director}}</h5>
                 <h6 class = "row text-right">Genres:  </h6>{{tags_fromlist(movie.genres) | safe}}
                 <h6 class = "row text-right mt-2">Actors: {{p_fromlist(movie.actors) | safe}}</h6>
-                <h6 class = "row text-right">Score:</h6> {{score_bar(movie.score) | safe}}
+                <h6 class = "row text-right">Review score:</h6> {{score_bar(movie.score) | safe}}
                 <div class="row">
                     <a href="{{movie.wikiurl}}" class="btn btn-secondary m-2"><span class="label">wikidata</span></a>
                     <a href="/recommandation={{movie.uri}}" class="btn btn-secondary m-2">recommendations based on this movie</a>
                     <i class="fa fa-wikipedia-w" aria-hidden="true"></i>
                 </div>
             </div>
-            <div class="col container" style="height:400px">
+            <div class="col container" style="height:15%">
                 {% if movie.poster_internal_url %}
                 <img class="img-thumbnail rounded float-left"
                     style="height:100%;max-width:100%;"
@@ -48,19 +47,36 @@
         <hr>
     {%endfor%}
     </div>
-    <div class='card-columns m-4'>
-        {% for  movie in  movies%}
-            <div class ='card m-2' style='height:200px;width:420px;'>
-                <div class = 'card-body'>
-                    <h5 class = "card-title">{{movie.title}}</h5>
-                    <h6 class = "card-text">Topic: {{movie.topic}}</h6>
-                    <h6 class = "card-text">Score:</h6> {{score_bar(movie.score) | safe}}
-                </div>
-                <div class="card-footer align-items-center">
-                    <a href="{{movie.wikiurl}}" class="btn btn-secondary ml-1 mb-1"><span class="label">Wiki</span></a>
-                    <a href="{{url_for('recommandation',movie=movie.to_json())}}"  class="btn btn-secondary mr-1 mb-1">Similar movies</a>
+    <div id = "accordion">
+        {%for reco in results.recommandations%}
+        <div class="card">
+            <div class="card-header" id="heading{{reco.id}}">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapse{{reco.id}}" aria-expanded="false" aria-controls="collapse{{reco.id}}">
+                        {{reco.text}}
+                    </button>
+                  </h5>
+            </div>
+            <div class="collapse" id="collapse{{reco.id}}">
+                <div class="card-body">
+                    <div class='card-columns m-4'>
+                        {% for  movie in reco.data%}
+                            <div class ='card m-2' style='height:15%;width:40%;'>
+                                <div class = 'card-body'>
+                                    <h5 class = "card-title">{{movie.title}}</h5>
+                                    <h6 class = "card-text">Topic: {{movie.topic}}</h6>
+                                    {{score_bar(movie.score, 'Relevance : ') | safe}}
+                                </div>
+                                <div class="card-footer align-items-center">
+                                    <a href="{{movie.wikiurl}}" class="btn btn-secondary ml-1 mb-1"><span class="label">Wiki</span></a>
+                                    <a href="{{url_for('recommandation',movie=movie.to_json())}}"  class="btn btn-secondary mr-1 mb-1">Similar movies</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
     <footer class="text-center text-lg-start text-white" style="background-color: #3e4551">
