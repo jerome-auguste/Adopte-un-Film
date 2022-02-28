@@ -77,6 +77,7 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
         FILTER (?score >= {score})
     }}
     GROUP BY ?film ?filmLabel ?directorLabel ?score
+    ORDER BY DESC(?score)
     LIMIT 100
     """
     print(query)
@@ -290,6 +291,8 @@ def recommendation_inspiredby(film, limit=20):
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
+res = get_film(director="Christopher Nolan")
+pprint(res)
 
 # res = recommendation_genre('Q44578', 10)
 # pprint(res)
