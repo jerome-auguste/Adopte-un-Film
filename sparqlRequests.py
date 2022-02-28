@@ -1,52 +1,20 @@
-from SPARQLWrapper import SPARQLWrapper, JSON
-import json
+from utils import pprint, get_sparql, get_prefix, search, format
+from SPARQLWrapper import JSON
 
+def get_movie(title: str=None, director: str=None, actor: str=None, genre: str=None, score: int=0) -> list:
+    """Result of queries movies matching some research criteria (film title, director name, actor name, genre and/or minimum score)
 
-def pprint(dict):
-    print(print(json.dumps(dict, indent=4, sort_keys=True)))
+    Args:
+        title (str, optional): Searched title. Defaults to None.
+        director (str, optional): Searched director. Defaults to None.
+        actor (str, optional): Searched actor. Defaults to None.
+        genre (str, optional): Searched genre. Defaults to None.
+        score (int, optional): Minimum score. Defaults to 0.
 
-
-def get_sparql():
-    return SPARQLWrapper("http://query.wikidata.org/sparql")
-
-
-def get_prefix():
-    return """
-    PREFIX wd: <http://www.wikidata.org/entity/>
-    PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-    PREFIX wikibase: <http://wikiba.se/ontology#>
-    PREFIX bd: <http://www.bigdata.com/rdf#>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    Returns:
+        list: result of the queries (list of movies with id, title, director's name, score, poster if exists, actors list and genres list)
     """
 
-
-def search(variable, target):
-    if variable is None or target is None:
-        return ""
-    return f"""
-    SERVICE wikibase:mwapi {{
-      bd:serviceParam wikibase:api "EntitySearch" .
-      bd:serviceParam wikibase:endpoint "www.wikidata.org" .
-      bd:serviceParam mwapi:search "{target}" .
-      bd:serviceParam mwapi:language "en" .
-      {variable} wikibase:apiOutputItem mwapi:item .
-    }}
-    """
-
-
-def format(res_list):
-    return [
-        {
-            key: elm[key]['value'].split(";") if "List" in key
-            else elm[key]['value']
-            for key in elm
-        }
-        for elm in res_list
-    ]
-
-
-def get_film(title=None, director=None, actor=None, genre=None, score=0):
     query = f"""
     {get_prefix()}
     SELECT ?film ?filmLabel ?directorLabel ?score
@@ -80,14 +48,24 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
     ORDER BY DESC(?score)
     LIMIT 100
     """
-    print(query)
+    # print(query)
     sp = get_sparql()
     sp.setQuery(query)
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
 
-def recommendation_topic(film, limit=20):
+def recommendation_topic(film: str, limit: int=20) -> list:
+    """Movie recommandations based on common main subjects with selected movie
+
+    Args:
+        film (str): URI of the selected movie
+        limit (int, optional): Maximum number of results to return. Defaults to 20.
+
+    Returns:
+        list: matching moveis with URI, title, number of awards recieved, score on Rotten Tomato and a "relevance score"
+    """
+
     query = f"""
     {get_prefix()}
     SELECT ?film ?filmLabel ?topicLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
@@ -114,14 +92,25 @@ def recommendation_topic(film, limit=20):
     ORDER BY DESC(?totalScore)
     LIMIT {limit}
     """
-    print(query)
+    # print(query)
     sp = get_sparql()
     sp.setQuery(query)
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
 
-def recommendation_based_on(film, limit=20):
+def recommendation_based_on(film: str, limit: int=20) -> list:
+    """Movie recommandations based on same story with selected movie
+
+    Args:
+        film (str): URI of the selected movie
+        limit (int, optional): Maximum number of results to return. Defaults to 20.
+
+    Returns:
+        list: matching moveis with URI, title, story on which the movie is based on,
+                number of awards recieved, score on Rotten Tomato and a "relevance score"
+    """
+
     query = f"""
     {get_prefix()}
     SELECT ?film ?filmLabel ?basedOnLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
@@ -149,14 +138,25 @@ def recommendation_based_on(film, limit=20):
     ORDER BY DESC(?totalScore)
     LIMIT {limit}
     """
-    print(query)
+    # print(query)
     sp = get_sparql()
     sp.setQuery(query)
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
 
-def recommendation_part_of_series(film, limit=20):
+def recommendation_part_of_series(film: str, limit: int=20) -> list:
+    """Movie recommandations from the same series with selected movie
+
+    Args:
+        film (str): URI of the selected movie
+        limit (int, optional): Maximum number of results to return. Defaults to 20.
+
+    Returns:
+        list: matching moveis with URI, title, series title,
+                number of awards recieved, score on Rotten Tomato and a "relevance score"
+    """
+    
     query = f"""
     {get_prefix()}
     SELECT ?film ?filmLabel ?seriesLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
@@ -189,7 +189,19 @@ def recommendation_part_of_series(film, limit=20):
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
-def recommendation_genre(film, limit=20):
+def recommendation_genre(film: str, limit: int=20) -> list:
+    """Movie recommandations based on common genres with selected movie
+
+    Args:
+        film (str): URI of the selected movie
+        limit (int, optional): Maximum number of results to return. Defaults to 20.
+
+    Returns:
+        list: matching moveis with URI, title,
+                number of awards recieved, score on Rotten Tomato and a "relevance score"
+                (genre list could not be displayed because of a timeout issue with wikidata)
+    """
+    
     query = f"""
     {get_prefix()}
     SELECT ?film ?filmLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
@@ -223,10 +235,20 @@ def recommendation_genre(film, limit=20):
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
-def recommendation_performer(film, limit=20):
+def recommendation_performer(film: str, limit: int=20) -> list:
+    """Movie recommandations having the same original soundtrack artist with selected movie
+
+    Args:
+        film (str): URI of the selected movie
+        limit (int, optional): Maximum number of results to return. Defaults to 20.
+
+    Returns:
+        list: matching moveis with URI, title, list of performers (artists),
+                number of awards recieved, score on Rotten Tomato and a "relevance score"
+    """
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?performerLabel; separator="; ") AS ?performersLabel) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?performerLabel; separator="; ") AS ?performersList) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
     WHERE {{
     {{
         SELECT ?originPerformer
@@ -257,10 +279,21 @@ def recommendation_performer(film, limit=20):
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
-def recommendation_inspiredby(film, limit=20):
+def recommendation_inspiredby(film: str, limit: int=20) -> list:
+    """Movie recommandations from the same inspiration with selected movie
+
+    Args:
+        film (str): URI of the selected movie
+        limit (int, optional): Maximum number of results to return. Defaults to 20.
+
+    Returns:
+        list: matching moveis with URI, title, inspiration list,
+                number of awards recieved, score on Rotten Tomato and a "relevance score"
+    """
+    
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?inspiredbyLabel; separator="; ") AS ?inspiredbysLabel) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?inspiredbyLabel; separator="; ") AS ?inspiredbyList) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
     WHERE {{
     {{
         SELECT ?originInspiredby

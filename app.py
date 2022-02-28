@@ -1,7 +1,7 @@
 # %%
 from flask import Flask, render_template, redirect, request, url_for
 from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
-from sparqlRequests import get_film, recommendation_topic
+from sparqlRequests import get_movie, recommendation_topic
 from flask_bootstrap import Bootstrap
 from flask_fontawesome import FontAwesome
 from env import env
@@ -40,7 +40,7 @@ def index():
 @app.route(f'/search/<data>', methods=['GET', 'POST'])
 def search(data):
     data = json.loads(data)
-    res = get_film(**data)
+    res = get_movie(**data)
     res = [Movie(mov) for mov in res]
     return render_template('movieList.html', movies=res)
 
@@ -49,7 +49,7 @@ def search(data):
 def recommandation(movie):
     movie = Movie(dataMovie=movie)
     if 'from_reco' in movie.__dict__ and movie.from_reco == True:
-        resmov = get_film(movie.title)
+        resmov = get_movie(movie.title)
         movie = Movie(resmov[0])
     res = recommendation_topic(movie.uri)
     res = [Movie(dataReco=mov) for mov in res]
