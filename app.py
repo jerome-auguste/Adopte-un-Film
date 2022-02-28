@@ -2,22 +2,25 @@
 import json
 import os
 from flask import Flask, render_template, redirect, request, url_for
+from recommandation import Recommandations
+from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
 from flask_bootstrap import Bootstrap
 from flask_fontawesome import FontAwesome
 from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
-from sparql_queries import get_movie, recommendation_topic
+from sparql_queries import get_movie
 from env import env
+import json
+import os
 from movie import Movie
 from recommandation import Recommandations
 
 # from pprint import pprint
 
 app = Flask(__name__, static_url_path='/static')
-bootstrap = Bootstrap(app)
-fontawesome = FontAwesome(app)
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
-
+bootstrap = Bootstrap(app)
+fontawesome = FontAwesome(app)
 app.jinja_env.globals.update(ul_fromlist=ul_fromlist)
 app.jinja_env.globals.update(p_fromlist=p_fromlist)
 app.jinja_env.globals.update(tags_fromlist=tags_fromlist)
@@ -27,6 +30,7 @@ app.jinja_env.globals.update(url_for=url_for)
 
 
 @app.route("/", methods=['GET', 'POST'])
+@app.route("/index", methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         data = {}
