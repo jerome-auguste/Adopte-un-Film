@@ -31,29 +31,37 @@ def get_movie(title: str = None,
            (SAMPLE(?poster) as ?poster)
            (GROUP_CONCAT(DISTINCT ?actorLabel; separator=";") as ?actorsList)
            (GROUP_CONCAT(DISTINCT ?genreLabel; separator=";") as ?genresList)
+
+
     WHERE {{
-        ?film wdt:P57 ?director ;
-              wdt:P161 ?actor ;
-              wdt:P136 ?genre ;
-              wdt:P444 ?brutScore .
-        OPTIONAL {{?film wdt:P3383 ?poster }}
-        OPTIONAL {{?film wdt:P18 ?poster }}
-        OPTIONAL {{?film wdt:P154 ?poster }}
+
+        ?film   wdt:P57     ?director;
+                wdt:P161    ?actor;
+                wdt:P136    ?genre;
+                wdt:P444    ?brutScore.
+        OPTIONAL {{?film    wdt:P3383   ?poster }}
+        OPTIONAL {{?film    wdt:P18     ?poster }}
+        OPTIONAL {{?film    wdt:P154    ?poster }}
+
         SERVICE wikibase:label {{
-            bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en".
-            ?film rdfs:label ?filmLabel .
-            ?director rdfs:label ?directorLabel .
-            ?actor rdfs:label ?actorLabel .
-            ?genre rdfs:label ?genreLabel .
+            bd:serviceParam     wikibase:language   "[AUTO_LANGUAGE],en".
+            ?film               rdfs:label          ?filmLabel.
+            ?director           rdfs:label          ?directorLabel.
+            ?actor              rdfs:label          ?actorLabel.
+            ?genre              rdfs:label          ?genreLabel.
         }}
+
         {search('?film', title)}
         {search('?director', director)}
         {search('?actor', actor)}
         {search('?genre', genre)}
+
         FILTER regex(?brutScore, "^[0-9]+%$")
         BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
         FILTER (?score >= {score})
     }}
+
+
     GROUP BY ?film ?filmLabel ?directorLabel ?score
     ORDER BY DESC(?score)
     LIMIT 100
@@ -77,28 +85,41 @@ def recommendation_topic(film: str, limit: int=20) -> list:
         number of awards recieved, score on Rotten Tomato and a "relevance score"
     """
 
+    # In the query, we assume that movies have a score < 100
+    # (removes noise - movies with few reviews)
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel ?topicLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    SELECT  ?film ?filmLabel ?topicLabel
+            (COUNT(DISTINCT ?award) AS ?numAwards)
+            ?score
+            ((?score + ?numAwards)*100/138 AS ?totalScore)
+
+
     WHERE {{
-    {{
-        SELECT ?topic
-        WHERE {{ wd:{film} wdt:P921 ?topic . }}
+
+        {{
+            SELECT ?topic
+            WHERE {{ wd:{film} wdt:P921 ?topic. }}
+        }}
+
+        ?film   wdt:P31     wd:Q11424;
+                wdt:P921    ?topic;
+                wdt:P444    ?brutScore.
+        OPTIONAL {{?film    wdt:P166    ?award.}}
+
+        SERVICE wikibase:label {{
+            bd:serviceParam     wikibase:language   "[AUTO_LANGUAGE],en".
+            ?film               rdfs:label          ?filmLabel.
+            ?topic              rdfs:label          ?topicLabel.
+        }}
+
+        FILTER regex(?brutScore, "^[0-9]+%$")
+        BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+        FILTER (?score != 100)
+        FILTER (?film != wd:{film})
     }}
-    ?film wdt:P31 wd:Q11424 ;
-          wdt:P921 ?topic ;
-          wdt:P444 ?brutScore .
-    OPTIONAL {{?film wdt:P166 ?award.}}
-    SERVICE wikibase:label {{
-        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
-        ?film rdfs:label ?filmLabel .
-        ?topic rdfs:label ?topicLabel .
-    }}
-    FILTER regex(?brutScore, "^[0-9]+%$")
-    BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
-    FILTER (?score != 100)
-    FILTER(?film != wd:{film})
-    }}
+
+
     GROUP BY ?film ?filmLabel ?topicLabel ?score
     ORDER BY DESC(?totalScore)
     LIMIT {limit}
@@ -122,29 +143,47 @@ def recommendation_based_on(film: str, limit: int=20) -> list:
                 number of awards recieved, score on Rotten Tomato and a "relevance score"
     """
 
+    # In the query, we assume that movies have a score < 100
+    # (removes noise - movies with few reviews)
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel ?basedOnLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    SELECT  ?film ?filmLabel ?basedOnLabel
+            (COUNT(DISTINCT ?award) AS ?numAwards)
+            ?score
+            ((?score + ?numAwards)*100/138 AS ?totalScore)
+
+
     WHERE {{
-      {{ SELECT ?originBasedOn WHERE {{OPTIONAL{{wd:{film} wdt:P144 ?originBasedOn}}}}}}
-      ?film wdt:P31 wd:Q11424 ;
-            wdt:P136 ?genre ;
-            wdt:P444 ?brutScore.
-      OPTIONAL{{?film wdt:P144 ?basedOn}}
-      OPTIONAL {{?film wdt:P166 ?award.}}
-          
-      SERVICE wikibase:label {{
-        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
-        ?film rdfs:label ?filmLabel .
-        ?basedOn rdfs:label ?basedOnLabel.
-      }}
-      
-      FILTER (?basedOn IN (?originBasedOn))
-      FILTER regex(?brutScore, "^[0-9]+%$")
-      BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
-      FILTER (?score != 100)
-      FILTER(?film != wd:{film})
+
+        {{
+            SELECT ?originBasedOn
+            WHERE {{
+                OPTIONAL{{
+                    wd:{film} wdt:P144 ?originBasedOn
+                }}
+            }}
+        }}
+
+        ?film   wdt:P31     wd:Q11424;
+                wdt:P136    ?genre;
+                wdt:P444    ?brutScore.
+        OPTIONAL{{?film     wdt:P144    ?basedOn}}
+        OPTIONAL {{?film    wdt:P166    ?award.}}
+            
+        SERVICE wikibase:label {{
+            bd:serviceParam     wikibase:language   "[AUTO_LANGUAGE],en".
+            ?film               rdfs:label          ?filmLabel.
+            ?basedOn            rdfs:label          ?basedOnLabel.
+        }}
+        
+        FILTER (?basedOn IN (?originBasedOn))
+        FILTER regex(?brutScore, "^[0-9]+%$")
+        BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+        FILTER (?score != 100)
+        FILTER(?film != wd:{film})
     }}
+
+
     GROUP BY ?film ?filmLabel ?score ?basedOnLabel
     ORDER BY DESC(?totalScore)
     LIMIT {limit}
@@ -168,28 +207,42 @@ def recommendation_part_of_series(film: str, limit: int=20) -> list:
                 number of awards recieved, score on Rotten Tomato and a "relevance score"
     """
 
+    # In the query, we assume that movies have a score < 100
+    # (removes noise - movies with few reviews)
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel ?seriesLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    SELECT  ?film ?filmLabel ?seriesLabel
+            (COUNT(DISTINCT ?award) AS ?numAwards)
+            ?score
+            ((?score + ?numAwards)*100/138 AS ?totalScore)
+
+
     WHERE {{
-      {{ SELECT ?series
-        WHERE {{ wd:{film} wdt:P179 ?series. }}
+
+      {{
+            SELECT ?series
+            WHERE {{ wd:{film} wdt:P179 ?series. }}
       }}
-      ?film wdt:P31 wd:Q11424 ;
-            wdt:P179 ?series ;
-            wdt:P444 ?brutScore.
+
+      ?film     wdt:P31     wd:Q11424;
+                wdt:P179    ?series;
+                wdt:P444    ?brutScore.
+
         OPTIONAL {{?film wdt:P166 ?award.}}
           
       SERVICE wikibase:label {{
-        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
-        ?film rdfs:label ?filmLabel .
-        ?basedOn rdfs:label ?basedOnLabel.
+        bd:serviceParam     wikibase:language   "[AUTO_LANGUAGE],en".
+        ?film               rdfs:label          ?filmLabel.
+        ?basedOn            rdfs:label          ?basedOnLabel.
       }}
+
       FILTER regex(?brutScore, "^[0-9]+%$")
       BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
       FILTER (?score != 100)
       FILTER(?film != wd:{film})
     }}
+
+
     GROUP BY ?film ?filmLabel ?seriesLabel ?score
     ORDER BY DESC(?totalScore)
     LIMIT {limit}
@@ -213,29 +266,43 @@ def recommendation_genre(film: str, limit: int=20) -> list:
                 (genre list could not be displayed because of a timeout issue with wikidata)
     """
 
+    # In the query, we assume that movies have a score < 100
+    # (removes noise - movies with few reviews)
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    SELECT  ?film ?filmLabel
+            (COUNT(DISTINCT ?award) AS ?numAwards)
+            ?score
+            ((?score + ?numAwards)*100/138 AS ?totalScore)
+
+
     WHERE {{
-    {{
-        SELECT ?originGenre
-        WHERE {{ wd:{film} wdt:P136 ?originGenre . }}
+
+        {{
+            SELECT ?originGenre
+            WHERE {{ wd:{film} wdt:P136 ?originGenre . }}
+        }}
+
+        ?film   wdt:P31     wd:Q11424;
+                wdt:P136    ?genre;
+                wdt:P444    ?brutScore.
+
+        OPTIONAL {{?film wdt:P166 ?award.}}
+
+        SERVICE wikibase:label {{
+            bd:serviceParam     wikibase:language   "[AUTO_LANGUAGE],en".
+            ?film               rdfs:label          ?filmLabel.
+            ?genre              rdfs:label          ?genreLabel.
+        }}
+
+        FILTER (?genre IN (?originGenre))
+        FILTER regex(?brutScore, "^[0-9]+%$")
+        BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+        FILTER (?score != 100)
+        FILTER(?film != wd:{film})
     }}
-    ?film wdt:P31 wd:Q11424 ;
-          wdt:P136 ?genre ;
-          wdt:P444 ?brutScore .
-    OPTIONAL {{?film wdt:P166 ?award.}}
-    SERVICE wikibase:label {{
-        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
-        ?film rdfs:label ?filmLabel .
-        ?genre rdfs:label ?genreLabel .
-    }}
-    FILTER (?genre IN (?originGenre))
-    FILTER regex(?brutScore, "^[0-9]+%$")
-    BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
-    FILTER (?score != 100)
-    FILTER(?film != wd:{film})
-    }}
+
+
     GROUP BY ?film ?filmLabel ?score
     ORDER BY DESC(?totalScore)
     LIMIT {limit}
@@ -257,29 +324,43 @@ def recommendation_performer(film: str, limit: int=20) -> list:
         list: matching moveis with URI, title, list of performers (artists),
                 number of awards recieved, score on Rotten Tomato and a "relevance score"
     """
+
+    # In the query, we assume that movies have a score < 100
+    # (removes noise - movies with few reviews)
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?performerLabel; separator="; ") AS ?performersList) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    SELECT  ?film ?filmLabel
+            (GROUP_CONCAT(DISTINCT ?performerLabel; separator="; ") AS ?performersList)
+            (COUNT(DISTINCT ?award) AS ?numAwards)
+            ?score
+            ((?score + ?numAwards)*100/138 AS ?totalScore)
+
+
     WHERE {{
-    {{
-        SELECT ?originPerformer
-        WHERE {{ wd:{film} wdt:P175 ?originPerformer . }}
+        {{
+            SELECT ?originPerformer
+            WHERE {{ wd:{film} wdt:P175 ?originPerformer. }}
+        }}
+        ?film   wdt:P31     wd:Q11424;
+                wdt:P175    ?performer;
+                wdt:P444    ?brutScore.
+
+        OPTIONAL {{?film wdt:P166 ?award.}}
+
+        SERVICE wikibase:label {{
+            bd:serviceParam     wikibase:language   "[AUTO_LANGUAGE],en".
+            ?film               rdfs:label          ?filmLabel.
+            ?performer          rdfs:label          ?performerLabel.
+        }}
+
+        FILTER (?performer IN (?originPerformer))
+        FILTER regex(?brutScore, "^[0-9]+%$")
+        BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+        FILTER (?score != 100)
+        FILTER(?film != wd:{film})
     }}
-    ?film wdt:P31 wd:Q11424 ;
-          wdt:P175 ?performer ;
-          wdt:P444 ?brutScore .
-    OPTIONAL {{?film wdt:P166 ?award.}}
-    SERVICE wikibase:label {{
-        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
-        ?film rdfs:label ?filmLabel .
-        ?performer rdfs:label ?performerLabel .
-    }}
-    FILTER (?performer IN (?originPerformer))
-    FILTER regex(?brutScore, "^[0-9]+%$")
-    BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
-    FILTER (?score != 100)
-    FILTER(?film != wd:{film})
-    }}
+
+
     GROUP BY ?film ?filmLabel ?score
     ORDER BY DESC(?totalScore)
     LIMIT {limit}
@@ -302,29 +383,44 @@ def recommendation_inspiredby(film: str, limit: int=20) -> list:
                 number of awards recieved, score on Rotten Tomato and a "relevance score"
     """
 
+    # In the query, we assume that movies have a score < 100
+    # (removes noise - movies with few reviews)
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?inspiredbyLabel; separator="; ") AS ?inspiredbyList) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    SELECT  ?film ?filmLabel
+            (GROUP_CONCAT(DISTINCT ?inspiredbyLabel; separator="; ") AS ?inspiredbyList)
+            (COUNT(DISTINCT ?award) AS ?numAwards)
+            ?score
+            ((?score + ?numAwards)*100/138 AS ?totalScore)
+
+
     WHERE {{
-    {{
-        SELECT ?originInspiredby
-        WHERE {{ wd:{film} wdt:P941 ?originInspiredby . }}
+
+        {{
+            SELECT ?originInspiredby
+            WHERE {{ wd:{film} wdt:P941 ?originInspiredby . }}
+        }}
+
+        ?film   wdt:P31     wd:Q11424;
+                wdt:P941    ?inspiredby;
+                wdt:P444    ?brutScore.
+
+        OPTIONAL {{?film wdt:P166 ?award.}}
+
+        SERVICE wikibase:label {{
+            bd:serviceParam     wikibase:language   "[AUTO_LANGUAGE],en".
+            ?film               rdfs:label          ?filmLabel.
+            ?inspiredby         rdfs:label          ?inspiredbyLabel.
+        }}
+
+        FILTER (?inspiredby IN (?originInspiredby))
+        FILTER regex(?brutScore, "^[0-9]+%$")
+        BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+        FILTER (?score != 100)
+        FILTER(?film != wd:{film})
     }}
-    ?film wdt:P31 wd:Q11424 ;
-          wdt:P941 ?inspiredby ;
-          wdt:P444 ?brutScore .
-    OPTIONAL {{?film wdt:P166 ?award.}}
-    SERVICE wikibase:label {{
-        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
-        ?film rdfs:label ?filmLabel .
-        ?inspiredby rdfs:label ?inspiredbyLabel .
-    }}
-    FILTER (?inspiredby IN (?originInspiredby))
-    FILTER regex(?brutScore, "^[0-9]+%$")
-    BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
-    FILTER (?score != 100)
-    FILTER(?film != wd:{film})
-    }}
+
+
     GROUP BY ?film ?filmLabel ?score
     ORDER BY DESC(?totalScore)
     LIMIT {limit}

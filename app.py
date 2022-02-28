@@ -1,14 +1,15 @@
 # %%
-from flask import Flask, render_template, redirect, request, url_for
-from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
-from sparql_requests import get_movie, recommendation_topic
-from flask_bootstrap import Bootstrap
-from flask_fontawesome import FontAwesome
-from env import env
 import json
 import os
-from pprint import pprint
+from flask import Flask, render_template, redirect, request, url_for
+from flask_bootstrap import Bootstrap
+from flask_fontawesome import FontAwesome
+from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
+from sparql_queries import get_movie, recommendation_topic
+from env import env
 from movie import Movie
+
+# from pprint import pprint
 
 app = Flask(__name__, static_url_path='/static')
 bootstrap = Bootstrap(app)
