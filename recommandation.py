@@ -1,5 +1,5 @@
 from typing import Iterable, List
-import sparqlRequests
+import sparql_queries
 from movie import Movie
 from joblib import Parallel, delayed
 from env import env
@@ -7,7 +7,7 @@ from env import env
 
 class Recommandation():
     def __init__(self, uri, func, id, text) -> None:
-        self.data = getattr(sparqlRequests, func)(uri)
+        self.data = getattr(sparql_queries, func)(uri)
         self.data = [Movie(dataReco=mov) for mov in self.data]
         self.id = id
         self.text = text

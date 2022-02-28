@@ -1,15 +1,16 @@
 # %%
-from flask import Flask, render_template, redirect, request, url_for
-from recommandation import Recommandations
-from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
-from sparqlRequests import get_film, recommendation_topic
-from flask_bootstrap import Bootstrap
-from flask_fontawesome import FontAwesome
-from env import env
 import json
 import os
-from pprint import pprint
+from flask import Flask, render_template, redirect, request, url_for
+from flask_bootstrap import Bootstrap
+from flask_fontawesome import FontAwesome
+from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
+from sparql_queries import get_movie, recommendation_topic
+from env import env
 from movie import Movie
+from recommandation import Recommandations
+
+# from pprint import pprint
 
 app = Flask(__name__, static_url_path='/static')
 bootstrap = Bootstrap(app)
@@ -41,7 +42,7 @@ def index():
 @app.route(f'/search/<data>', methods=['GET', 'POST'])
 def search(data):
     data = json.loads(data)
-    res = get_film(**data)
+    res = get_movie(**data)
     res = [Movie(mov) for mov in res]
     return render_template('movieList.html', movies=res)
 
@@ -50,7 +51,7 @@ def search(data):
 def recommandation(movie):
     movie = Movie(dataMovie=movie)
     if 'from_reco' in movie.__dict__ and movie.from_reco == True:
-        resmov = get_film(movie.title)
+        resmov = get_movie(movie.title)
         movie = Movie(resmov[0])
     res = Recommandations(movie)
     return render_template('recommandations.html', main_movie=[movie], results=res)
