@@ -1,7 +1,6 @@
 """Utility functions used for the project"""
 import json
 from SPARQLWrapper import SPARQLWrapper
-from env import env
 
 # ----------------------------- Utilities for backend and frontend -----------------------------
 
