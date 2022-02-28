@@ -1,17 +1,13 @@
-# %%
 import json
 import os
 from flask import Flask, render_template, redirect, request, url_for
-from recommandation import Recommandations
 from flask_bootstrap import Bootstrap
 from flask_fontawesome import FontAwesome
+from recommandation import Recommandations
 from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar
 from sparql_queries import get_movie
 from env import env
-import json
-import os
 from movie import Movie
-from recommandation import Recommandations
 
 # from pprint import pprint
 
@@ -51,7 +47,7 @@ def search(data):
 @app.route(f'/reco/<movie>')
 def recommandation(movie):
     movie = Movie(dataMovie=movie)
-    if 'from_reco' in movie.__dict__ and movie.from_reco == True:
+    if 'from_reco' in movie.__dict__ and movie.from_reco is True:
         resmov = get_movie(movie.title)
         movie = Movie(resmov[0])
     res = Recommandations(movie)
@@ -72,4 +68,3 @@ def decrease():
 
 if __name__ == '__main__':
     app.run(debug=True)
-# %%
