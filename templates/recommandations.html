@@ -14,7 +14,7 @@
 
 <body>
     <header class="jumbotron p-5 text-center bg-image">
-        <h1 class="">Movies recommendation tool using Sparql</h1>
+        <h1 class="">Movie recommendation tool using Sparql</h1>
     </header>
     <div class = "container-fluid">
     {%for movie in main_movie%}
@@ -25,11 +25,11 @@
                 </div>
                 <h5 class = "row text-right">{{movie.director}}</h5>
                 <h6 class = "row text-right">Genres:  </h6>{{tags_fromlist(movie.genres) | safe}}
-                <h6 class = "row text-right mt-2">Actors: {{p_fromlist(movie.actors) | safe}}</h6>
+                <h6 class = "row text-right mt-2">Actors:&nbsp;{{p_fromlist(movie.actors) | safe}}</h6>
                 <h6 class = "row text-right">Review score:</h6> {{score_bar(movie.score) | safe}}
                 <div class="row">
                     <a href="{{movie.wikiurl}}" class="btn btn-secondary m-2"><span class="label"><i class="fa fa-wikipedia-w" aria-hidden="true"></i></span></a>
-                    <a href="{{url_for('recommandation',movie=movie.to_json())}}" class="btn btn-secondary m-2">recommendations based on this movie</a>
+                    <a href="{{url_for('recommandation',movie=movie.to_json())}}" class="btn btn-secondary m-2">More movies like this</a>
                 </div>
             </div>
             <div class="col container" style="height:15%">
@@ -62,7 +62,7 @@
                                 </div>
                                 <div class="card-footer align-items-center">
                                     <a href="{{movie.wikiurl}}" class="btn btn-secondary ml-1 mb-1"><span class="label"><i class="fa fa-wikipedia-w" aria-hidden="true"></i></span></a>
-                                    <a href="{{url_for('recommandation',movie=movie.to_json())}}"  class="btn btn-secondary mr-1 mb-1">More informations</a>
+                                    <a href="{{url_for('recommandation',movie=movie.to_json())}}"  class="btn btn-secondary mr-1 mb-1">More info</a>
                                 </div>
                             </div>
                         {% endfor %}

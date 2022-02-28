@@ -1,12 +1,12 @@
 
 class BaseEnv:
     available_fields = ['director', 'actor', 'genre', 'title', 'score']
-    recommendation_categories = ['Based on the main subject',
+    recommendation_categories = ['Based on similar subjects',
                                  'Based on the same story',
-                                 'From the same saga',
+                                 'From the same series',
                                  'In the same genre',
-                                 'With the same performer',
-                                 'Inspired by']
+                                 'With the same performer (OST)',
+                                 'Similar inspirations']
     recommandation_keys = ['topicLabel',
                            'basedOnLabel', 'seriesLabel']
     recommandation_functions = ['recommendation_topic', 'recommendation_based_on', 'recommendation_part_of_series',
