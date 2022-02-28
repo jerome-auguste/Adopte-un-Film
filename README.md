@@ -1,18 +1,18 @@
 # Movie-Selector
 Design a movie request interface using the rdf based IMDB. Then try to design a simple movie recommender.
 
-## Setup :
+## Setup:
 1. Clone the repo
 2. Install the requirements with `pip install -r requirements.txt` at the root of the repo
-3. Run the command `flask run` at the root of the repo
+3. Optionnal but necessary sometimes: run `export FLASK_APP=app`
+4. Run the command `flask run` at the root of the repo
 
-## How to use :
-- Add or remove any number of filters for your search with the "Add field" and "Remove field" buttons.
-- Select a field and provide a value for each filter, then click the "search" button.
+## How to use:
+- Select a field and provide a value for it, repeat for any number of filter, then click the "search" button.
 - On the search results page, you can consult the wikidata page of each movie, or ask for similar movies for each movie.
 - On the recommendation page, you can consult the wikidata page of each movie, or click on the "similar movies" button on a card to have more informations about a movie.
 
-## Notes on ontologies :
+## Notes on ontologies:
 Text based selection is mandatory to be able to recommend film by director, actor or genre, since we cannot expect users to know the properties ID.
 Thus, the choice of the ontology depended on *endpoint availability* and the ability to make *efficient text based selection*, as the usual `(FILTER(regex(...))` timeout more often than not. 
 - IMDB does not seems to have a SPARQL endpoint.
@@ -23,3 +23,7 @@ Thus, the choice of the ontology depended on *endpoint availability* and the abi
     - However, DBPedia has far fewer information than Wikidata. Properties such as `genre` and `rating` are missing.
     - We should be able to link both ontology with `owl:sameAs`, but federated query are disabled on DBPedia, so we cannot run a conjoined search on both endpoint at the same time...
     - Finally, `mwapi` allow efficient text search on wikidata. *Warning* : it is NOT a text filter like `regex` or `bif:contains`, but more of an indexed search like Google (that's probably why it doesn't time out). It may not match anything for a standard word like 'the', or a name like 'scott', but will find matches for more specific strings like 'ridley scott' or 'nolan'.
+
+## Requests and recommendations:
+- *Posters* are downloaded when available, and we fallback to an image, or even to a logo, if it is missing. Even so, most movies do not have any sort of associated image on wikidata.
+- For recommendations, time out issues impose to keep thing reasonable. Complex similitude criterion, such as movies with the most number of common genre and actor, will time out.
