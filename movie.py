@@ -2,6 +2,7 @@ import os
 from numpy import block
 import requests
 import json
+from env import env
 
 
 class Movie():
@@ -36,10 +37,13 @@ class Movie():
     def init_from_reco(self, data):
         self.wikiurl: str = data['film']
         self.title: str = data['filmLabel']
-        self.topic: str = data['topicLabel']
         self.score: str = data['score']
         self.uri: str = data['film'].split('/')[-1]
         self.from_reco = True
+        self.reco = ''
+        for attr, key in data.items():
+            if attr in env.recommandation_keys:
+                self.reco = key
 
     def download_poster(self):
         name = self.poster_url.split('/')[-1]
