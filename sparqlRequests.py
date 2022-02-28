@@ -291,8 +291,8 @@ def recommendation_inspiredby(film, limit=20):
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
 
-res = get_film(director="Christopher Nolan")
-pprint(res)
+# res = get_film(director="Christopher Nolan")
+# pprint(res)
 
 # res = recommendation_genre('Q44578', 10)
 # pprint(res)
