@@ -1,7 +1,7 @@
 # %%
 from flask import Flask, render_template, redirect, request, url_for
 from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
-from sparqlRequests import get_movie, recommendation_topic
+from sparql_requests import get_movie, recommendation_topic
 from flask_bootstrap import Bootstrap
 from flask_fontawesome import FontAwesome
 from env import env

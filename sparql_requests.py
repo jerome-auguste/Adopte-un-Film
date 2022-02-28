@@ -1,8 +1,16 @@
-from utils import pprint, get_sparql, get_prefix, search, format
-from SPARQLWrapper import JSON
+"""Few queries on movie search and recommandation based on wikidata endpoint"""
 
-def get_movie(title: str=None, director: str=None, actor: str=None, genre: str=None, score: int=0) -> list:
-    """Result of queries movies matching some research criteria (film title, director name, actor name, genre and/or minimum score)
+from SPARQLWrapper import JSON
+from utils import get_sparql, get_prefix, search, resp_format # , pprint
+
+
+def get_movie(title: str = None,
+              director: str = None,
+              actor: str = None,
+              genre: str = None,
+              score: int = 0) -> list:
+    """Result of queries movies matching some research criteria
+    (film title, director name, actor name, genre and/or minimum score)
 
     Args:
         title (str, optional): Searched title. Defaults to None.
@@ -12,7 +20,9 @@ def get_movie(title: str=None, director: str=None, actor: str=None, genre: str=N
         score (int, optional): Minimum score. Defaults to 0.
 
     Returns:
-        list: result of the queries (list of movies with id, title, director's name, score, poster if exists, actors list and genres list)
+        list: result of the queries
+            (list of movies with id, title, director's name,
+            score, poster if exists, actors list and genres list)
     """
 
     query = f"""
@@ -49,10 +59,10 @@ def get_movie(title: str=None, director: str=None, actor: str=None, genre: str=N
     LIMIT 100
     """
     # print(query)
-    sp = get_sparql()
-    sp.setQuery(query)
-    sp.setReturnFormat(JSON)
-    return format(sp.query().convert()['results']['bindings'])
+    sp_wrapper = get_sparql()
+    sp_wrapper.setQuery(query)
+    sp_wrapper.setReturnFormat(JSON)
+    return resp_format(sp_wrapper.query().convert()['results']['bindings'])
 
 
 def recommendation_topic(film: str, limit: int=20) -> list:
@@ -63,7 +73,8 @@ def recommendation_topic(film: str, limit: int=20) -> list:
         limit (int, optional): Maximum number of results to return. Defaults to 20.
 
     Returns:
-        list: matching moveis with URI, title, number of awards recieved, score on Rotten Tomato and a "relevance score"
+        list: matching moveis with URI, title,
+        number of awards recieved, score on Rotten Tomato and a "relevance score"
     """
 
     query = f"""
@@ -93,10 +104,10 @@ def recommendation_topic(film: str, limit: int=20) -> list:
     LIMIT {limit}
     """
     # print(query)
-    sp = get_sparql()
-    sp.setQuery(query)
-    sp.setReturnFormat(JSON)
-    return format(sp.query().convert()['results']['bindings'])
+    sp_wrapper = get_sparql()
+    sp_wrapper.setQuery(query)
+    sp_wrapper.setReturnFormat(JSON)
+    return resp_format(sp_wrapper.query().convert()['results']['bindings'])
 
 
 def recommendation_based_on(film: str, limit: int=20) -> list:
@@ -139,10 +150,10 @@ def recommendation_based_on(film: str, limit: int=20) -> list:
     LIMIT {limit}
     """
     # print(query)
-    sp = get_sparql()
-    sp.setQuery(query)
-    sp.setReturnFormat(JSON)
-    return format(sp.query().convert()['results']['bindings'])
+    sp_wrapper = get_sparql()
+    sp_wrapper.setQuery(query)
+    sp_wrapper.setReturnFormat(JSON)
+    return resp_format(sp_wrapper.query().convert()['results']['bindings'])
 
 
 def recommendation_part_of_series(film: str, limit: int=20) -> list:
@@ -156,7 +167,7 @@ def recommendation_part_of_series(film: str, limit: int=20) -> list:
         list: matching moveis with URI, title, series title,
                 number of awards recieved, score on Rotten Tomato and a "relevance score"
     """
-    
+
     query = f"""
     {get_prefix()}
     SELECT ?film ?filmLabel ?seriesLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
@@ -184,10 +195,10 @@ def recommendation_part_of_series(film: str, limit: int=20) -> list:
     LIMIT {limit}
     """
     print(query)
-    sp = get_sparql()
-    sp.setQuery(query)
-    sp.setReturnFormat(JSON)
-    return format(sp.query().convert()['results']['bindings'])
+    sp_wrapper = get_sparql()
+    sp_wrapper.setQuery(query)
+    sp_wrapper.setReturnFormat(JSON)
+    return resp_format(sp_wrapper.query().convert()['results']['bindings'])
 
 def recommendation_genre(film: str, limit: int=20) -> list:
     """Movie recommandations based on common genres with selected movie
@@ -201,7 +212,7 @@ def recommendation_genre(film: str, limit: int=20) -> list:
                 number of awards recieved, score on Rotten Tomato and a "relevance score"
                 (genre list could not be displayed because of a timeout issue with wikidata)
     """
-    
+
     query = f"""
     {get_prefix()}
     SELECT ?film ?filmLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
@@ -230,10 +241,10 @@ def recommendation_genre(film: str, limit: int=20) -> list:
     LIMIT {limit}
     """
     print(query)
-    sp = get_sparql()
-    sp.setQuery(query)
-    sp.setReturnFormat(JSON)
-    return format(sp.query().convert()['results']['bindings'])
+    sp_wrapper = get_sparql()
+    sp_wrapper.setQuery(query)
+    sp_wrapper.setReturnFormat(JSON)
+    return resp_format(sp_wrapper.query().convert()['results']['bindings'])
 
 def recommendation_performer(film: str, limit: int=20) -> list:
     """Movie recommandations having the same original soundtrack artist with selected movie
@@ -274,10 +285,10 @@ def recommendation_performer(film: str, limit: int=20) -> list:
     LIMIT {limit}
     """
     print(query)
-    sp = get_sparql()
-    sp.setQuery(query)
-    sp.setReturnFormat(JSON)
-    return format(sp.query().convert()['results']['bindings'])
+    sp_wrapper = get_sparql()
+    sp_wrapper.setQuery(query)
+    sp_wrapper.setReturnFormat(JSON)
+    return resp_format(sp_wrapper.query().convert()['results']['bindings'])
 
 def recommendation_inspiredby(film: str, limit: int=20) -> list:
     """Movie recommandations from the same inspiration with selected movie
@@ -290,7 +301,7 @@ def recommendation_inspiredby(film: str, limit: int=20) -> list:
         list: matching moveis with URI, title, inspiration list,
                 number of awards recieved, score on Rotten Tomato and a "relevance score"
     """
-    
+
     query = f"""
     {get_prefix()}
     SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?inspiredbyLabel; separator="; ") AS ?inspiredbyList) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
@@ -319,10 +330,10 @@ def recommendation_inspiredby(film: str, limit: int=20) -> list:
     LIMIT {limit}
     """
     print(query)
-    sp = get_sparql()
-    sp.setQuery(query)
-    sp.setReturnFormat(JSON)
-    return format(sp.query().convert()['results']['bindings'])
+    sp_wrapper = get_sparql()
+    sp_wrapper.setQuery(query)
+    sp_wrapper.setReturnFormat(JSON)
+    return resp_format(sp_wrapper.query().convert()['results']['bindings'])
 
 # res = get_film(director="Christopher Nolan")
 # pprint(res)

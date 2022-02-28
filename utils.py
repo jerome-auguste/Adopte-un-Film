@@ -1,19 +1,44 @@
-from env import env
+"""Utility functions used for the project"""
 import json
-from SPARQLWrapper import SPARQLWrapper, JSON
+from SPARQLWrapper import SPARQLWrapper
+from env import env
+
+# ----------------------------- Utilities for backend and frontend -----------------------------
+def ul_fromlist(python_list: list) -> str:
+    """Formatting list for HTML
+
+    Args:
+        python_list (list): python list to format for HTML
+
+    Returns:
+        str: HMTL code for the list
+    """
+    return '<ul>' + '<li>'+'<li>'.join(python_list) + '</ul>'
 
 
-def ul_fromlist(list):
-    return '<ul>' + '<li>'+'<li>'.join(list) + '</ul>'
+def p_fromlist(python_list: list) -> str:
+    """Formatting list into paragraph in HTML
+
+    Args:
+        python_list (list): python list to format
+
+    Returns:
+        str: HMTL code for the list
+    """
+    return '<p>' + ', '.join(python_list) + '</p>'
 
 
-def p_fromlist(list):
-    return '<p>' + ', '.join(list) + '</p>'
+def tags_fromlist(python_list: list) -> str:
+    """Format python list into a set of tags in HTML
 
+    Args:
+        python_list (list): python list to format
 
-def tags_fromlist(list):
+    Returns:
+        str: Tag formatted list in HTML
+    """
     strr = ''
-    for tag in list:
+    for tag in python_list:
         strr += f"<button type='button' class='btn btn-outline-info mr-2 mb-1'>{tag}</button>"
     return strr
 
@@ -38,7 +63,16 @@ def form(num):
                 </div>"""
 
 
-def score_bar(value):
+def score_bar(value: float) -> str:
+    """Score bar in HTML
+
+    Args:
+        value (float): Value of the score (between 0 and 100)
+
+    Returns:
+        str: HTML code for the score bar
+    """
+
     return f"""<div class='progress'>
                     <div    class='progress-bar progress-bar-striped progress-bar-animated'
                             role='progressbar'
@@ -52,14 +86,14 @@ def score_bar(value):
 
 # ----------------------------- Utilities for sparql queries -----------------------------
 
-def pprint(dict: dict) -> None:
+def pprint(python_dict: dict) -> None:
     """Pretty printer for json objects, only for dev purposes
 
     Args:
         dict (dict): input dictionnary in json format
     """
 
-    print(print(json.dumps(dict, indent=4, sort_keys=True)))
+    print(print(json.dumps(python_dict, indent=4, sort_keys=True)))
 
 
 def get_sparql() -> SPARQLWrapper:
@@ -113,7 +147,7 @@ def search(variable: str, target: str) -> str:
     """
 
 
-def format(res_list: list) -> list[dict]:
+def resp_format(res_list: list) -> list[dict]:
     """Format query result into a dictionnary
 
     Args:
