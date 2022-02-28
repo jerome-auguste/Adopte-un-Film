@@ -60,16 +60,18 @@
             <div class="collapse" id="collapse{{reco.id}}">
                 <div class="card-body">
                     <div class='card-columns m-4'>
-                        {% for  movie in reco.data%}
+                        {%for movie in reco.data%}
                             <div class ='card m-2' style='height:15%;width:40%;'>
                                 <div class = 'card-body'>
                                     <h5 class = "card-title">{{movie.title}}</h5>
-                                    <h6 class = "card-text">Topic: {{movie.topic}}</h6>
+                                    {% if movie.reco != '' %}
+                                        <h6 class = "card-text">Recommendation based on: {{movie.reco}}</h6>
+                                    {% endif %}
                                     {{score_bar(movie.score, 'Relevance : ') | safe}}
                                 </div>
                                 <div class="card-footer align-items-center">
                                     <a href="{{movie.wikiurl}}" class="btn btn-secondary ml-1 mb-1"><span class="label">Wiki</span></a>
-                                    <a href="{{url_for('recommandation',movie=movie.to_json())}}"  class="btn btn-secondary mr-1 mb-1">Similar movies</a>
+                                    <a href="{{url_for('recommandation',movie=movie.to_json())}}"  class="btn btn-secondary mr-1 mb-1">More informations</a>
                                 </div>
                             </div>
                         {% endfor %}
