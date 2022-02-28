@@ -86,10 +86,10 @@ def get_film(title=None, director=None, actor=None, genre=None, score=0):
     return format(sp.query().convert()['results']['bindings'])
 
 
-def recommendation(film, limit=20):
+def recommendation_topic(film, limit=20):
     query = f"""
     {get_prefix()}
-    SELECT ?film ?filmLabel ?topicLabel ?score
+    SELECT ?film ?filmLabel ?topicLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
     WHERE {{
     {{
         SELECT ?topic
@@ -98,6 +98,7 @@ def recommendation(film, limit=20):
     ?film wdt:P31 wd:Q11424 ;
           wdt:P921 ?topic ;
           wdt:P444 ?brutScore .
+    OPTIONAL {{?film wdt:P166 ?award.}}
     SERVICE wikibase:label {{
         bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
         ?film rdfs:label ?filmLabel .
@@ -108,7 +109,8 @@ def recommendation(film, limit=20):
     FILTER (?score != 100)
     FILTER(?film != wd:{film})
     }}
-    ORDER BY DESC(?score)
+    GROUP BY ?film ?filmLabel ?topicLabel ?score
+    ORDER BY DESC(?totalScore)
     LIMIT {limit}
     """
     print(query)
@@ -116,3 +118,179 @@ def recommendation(film, limit=20):
     sp.setQuery(query)
     sp.setReturnFormat(JSON)
     return format(sp.query().convert()['results']['bindings'])
+
+
+def recommendation_based_on(film, limit=20):
+    query = f"""
+    {get_prefix()}
+    SELECT ?film ?filmLabel ?basedOnLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    WHERE {{
+      {{ SELECT ?originBasedOn WHERE {{OPTIONAL{{wd:{film} wdt:P144 ?originBasedOn}}}}}}
+      ?film wdt:P31 wd:Q11424 ;
+            wdt:P136 ?genre ;
+            wdt:P444 ?brutScore.
+      OPTIONAL{{?film wdt:P144 ?basedOn}}
+      OPTIONAL {{?film wdt:P166 ?award.}}
+          
+      SERVICE wikibase:label {{
+        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
+        ?film rdfs:label ?filmLabel .
+        ?basedOn rdfs:label ?basedOnLabel.
+      }}
+      
+      FILTER (?basedOn IN (?originBasedOn))
+      FILTER regex(?brutScore, "^[0-9]+%$")
+      BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+      FILTER (?score != 100)
+      FILTER(?film != wd:{film})
+    }}
+    GROUP BY ?film ?filmLabel ?score ?basedOnLabel
+    ORDER BY DESC(?totalScore)
+    LIMIT {limit}
+    """
+    print(query)
+    sp = get_sparql()
+    sp.setQuery(query)
+    sp.setReturnFormat(JSON)
+    return format(sp.query().convert()['results']['bindings'])
+
+
+def recommendation_part_of_series(film, limit=20):
+    query = f"""
+    {get_prefix()}
+    SELECT ?film ?filmLabel ?seriesLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    WHERE {{
+      {{ SELECT ?series
+        WHERE {{ wd:{film} wdt:P179 ?series. }}
+      }}
+      ?film wdt:P31 wd:Q11424 ;
+            wdt:P179 ?series ;
+            wdt:P444 ?brutScore.
+        OPTIONAL {{?film wdt:P166 ?award.}}
+          
+      SERVICE wikibase:label {{
+        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
+        ?film rdfs:label ?filmLabel .
+        ?basedOn rdfs:label ?basedOnLabel.
+      }}
+      FILTER regex(?brutScore, "^[0-9]+%$")
+      BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+      FILTER (?score != 100)
+      FILTER(?film != wd:{film})
+    }}
+    GROUP BY ?film ?filmLabel ?seriesLabel ?score
+    ORDER BY DESC(?totalScore)
+    LIMIT {limit}
+    """
+    print(query)
+    sp = get_sparql()
+    sp.setQuery(query)
+    sp.setReturnFormat(JSON)
+    return format(sp.query().convert()['results']['bindings'])
+
+def recommendation_genre(film, limit=20):
+    query = f"""
+    {get_prefix()}
+    SELECT ?film ?filmLabel (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    WHERE {{
+    {{
+        SELECT ?originGenre
+        WHERE {{ wd:{film} wdt:P136 ?originGenre . }}
+    }}
+    ?film wdt:P31 wd:Q11424 ;
+          wdt:P136 ?genre ;
+          wdt:P444 ?brutScore .
+    OPTIONAL {{?film wdt:P166 ?award.}}
+    SERVICE wikibase:label {{
+        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
+        ?film rdfs:label ?filmLabel .
+        ?genre rdfs:label ?genreLabel .
+    }}
+    FILTER (?genre IN (?originGenre))
+    FILTER regex(?brutScore, "^[0-9]+%$")
+    BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+    FILTER (?score != 100)
+    FILTER(?film != wd:{film})
+    }}
+    GROUP BY ?film ?filmLabel ?score
+    ORDER BY DESC(?totalScore)
+    LIMIT {limit}
+    """
+    print(query)
+    sp = get_sparql()
+    sp.setQuery(query)
+    sp.setReturnFormat(JSON)
+    return format(sp.query().convert()['results']['bindings'])
+
+def recommendation_performer(film, limit=20):
+    query = f"""
+    {get_prefix()}
+    SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?performerLabel; separator="; ") AS ?performersLabel) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    WHERE {{
+    {{
+        SELECT ?originPerformer
+        WHERE {{ wd:{film} wdt:P175 ?originPerformer . }}
+    }}
+    ?film wdt:P31 wd:Q11424 ;
+          wdt:P175 ?performer ;
+          wdt:P444 ?brutScore .
+    OPTIONAL {{?film wdt:P166 ?award.}}
+    SERVICE wikibase:label {{
+        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
+        ?film rdfs:label ?filmLabel .
+        ?performer rdfs:label ?performerLabel .
+    }}
+    FILTER (?performer IN (?originPerformer))
+    FILTER regex(?brutScore, "^[0-9]+%$")
+    BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+    FILTER (?score != 100)
+    FILTER(?film != wd:{film})
+    }}
+    GROUP BY ?film ?filmLabel ?score
+    ORDER BY DESC(?totalScore)
+    LIMIT {limit}
+    """
+    print(query)
+    sp = get_sparql()
+    sp.setQuery(query)
+    sp.setReturnFormat(JSON)
+    return format(sp.query().convert()['results']['bindings'])
+
+def recommendation_inspiredby(film, limit=20):
+    query = f"""
+    {get_prefix()}
+    SELECT ?film ?filmLabel (GROUP_CONCAT(DISTINCT ?inspiredbyLabel; separator="; ") AS ?inspiredbysLabel) (COUNT(DISTINCT ?award) AS ?numAwards) ?score ((?score + ?numAwards)*100/138 AS ?totalScore)
+    WHERE {{
+    {{
+        SELECT ?originInspiredby
+        WHERE {{ wd:{film} wdt:P941 ?originInspiredby . }}
+    }}
+    ?film wdt:P31 wd:Q11424 ;
+          wdt:P941 ?inspiredby ;
+          wdt:P444 ?brutScore .
+    OPTIONAL {{?film wdt:P166 ?award.}}
+    SERVICE wikibase:label {{
+        bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" .
+        ?film rdfs:label ?filmLabel .
+        ?inspiredby rdfs:label ?inspiredbyLabel .
+    }}
+    FILTER (?inspiredby IN (?originInspiredby))
+    FILTER regex(?brutScore, "^[0-9]+%$")
+    BIND(xsd:integer(REPLACE(?brutScore, "%$", "")) AS ?score)
+    FILTER (?score != 100)
+    FILTER(?film != wd:{film})
+    }}
+    GROUP BY ?film ?filmLabel ?score
+    ORDER BY DESC(?totalScore)
+    LIMIT {limit}
+    """
+    print(query)
+    sp = get_sparql()
+    sp.setQuery(query)
+    sp.setReturnFormat(JSON)
+    return format(sp.query().convert()['results']['bindings'])
+
+
+
+res = recommendation_genre('Q44578', 10)
+pprint(res)
