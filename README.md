@@ -29,6 +29,8 @@ After opening the aforementioned link in your browser, few intuitive steps are d
 
 ## :bulb: Main ideas
 
+Used queries are printed in real time in the terminal where flask was launched (for dev purposes).
+
 ### Search engine
 
 The movie search engine is quite simple and relies on the most comon attributes (title, director, a main actor, genre and/or minimum review score on Rotten Tomato) as filters. The query is parametrised so the user can fill as much fields as he wants to. A ranking of the results is made thanks to the review score.
@@ -81,4 +83,3 @@ Limitting the number of instances helps in keeping the webpage light.
 In order to give more information about a movie, one can try to combine more movie databases and aggregate some data
 
 Other improvement could be investigated in optimising the queries to prevent timeout on complex aggregation functions either to give more information or to improve the *Relevance score* (using similarity functions such as the number of actors in common...)
-
