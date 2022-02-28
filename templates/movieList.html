@@ -25,11 +25,11 @@
                 </div>
                 <h5 class = "row text-right">{{movie.director}}</h5>
                 <h6 class = "row text-right">Genres:  </h6>{{tags_fromlist(movie.genres) | safe}}
-                <h6 class = "row text-right mt-2">Actors: {{p_fromlist(movie.actors) | safe}}</h6>
+                <h6 class = "row text-right mt-2">Actors:&nbsp;{{p_fromlist(movie.actors) | safe}}</h6>
                 <h6 class = "row text-right">Score:</h6> {{score_bar(movie.score) | safe}}
                 <div class="row">
                     <a href="{{movie.wikiurl}}" class="btn btn-secondary m-2"><span class="label"><i class="fa fa-wikipedia-w" aria-hidden="true"></i></span></a>
-                    <a href="{{url_for('recommandation',movie=movie.to_json())}}" class="btn btn-secondary m-2">recommendations based on this movie</a>
+                    <a href="{{url_for('recommandation',movie=movie.to_json())}}" class="btn btn-secondary m-2">More movies like this</a>
                 </div>
             </div>
             <div class="col container" style="height:15%">
@@ -46,7 +46,7 @@
                     <div class="align-bottom"> Developped by Jérôme Auguste, Nathan Bruckmann, Ruben Partouche</div>
                 </div>
                 <div class="col-4">
-                    <div class="align-bottom"> Using Sparql endpoints : wikidata, dbpedia</div>
+                    <div class="align-bottom"> Using Sparql endpoints: wikidata, dbpedia</div>
                 </div>
             </div>
 
