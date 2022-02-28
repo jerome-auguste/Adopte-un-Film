@@ -23,8 +23,9 @@ class Movie():
         self.wikiurl: str = data['film']
         self.uri: str = data['film'].split('/')[-1]
         try:
-            self.poster_url = data['poster']
-            self.download_poster()
+            pass
+            # self.poster_url = data['poster']
+            # self.download_poster()
         except:
             pass
 
