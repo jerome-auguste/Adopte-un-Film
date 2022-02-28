@@ -1,7 +1,7 @@
 # %%
 from flask import Flask, render_template, redirect, request, url_for
 from utils import ul_fromlist, p_fromlist, tags_fromlist, score_bar, form
-from sparqlRequests import get_film, recommendation
+from sparqlRequests import get_film, recommendation_topic
 from flask_bootstrap import Bootstrap
 from flask_fontawesome import FontAwesome
 from env import env
@@ -51,7 +51,7 @@ def recommandation(movie):
     if 'from_reco' in movie.__dict__ and movie.from_reco == True:
         resmov = get_film(movie.title)
         movie = Movie(resmov[0])
-    res = recommendation(movie.uri)
+    res = recommendation_topic(movie.uri)
     res = [Movie(dataReco=mov) for mov in res]
     return render_template('recommandations.html', main_movie=[movie], movies=res)
 
