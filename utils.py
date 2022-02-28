@@ -4,6 +4,8 @@ from SPARQLWrapper import SPARQLWrapper
 from env import env
 
 # ----------------------------- Utilities for backend and frontend -----------------------------
+
+
 def ul_fromlist(python_list: list) -> str:
     """Formatting list for HTML
 
@@ -43,27 +45,7 @@ def tags_fromlist(python_list: list) -> str:
     return strr
 
 
-def form(num):
-    options = ''.join(
-        [f"<option value='{opt}'> {opt} </option>" for opt in env.available_fields])
-
-    return f"""<div class="form-group m-2">
-                    <div class='col'>
-                        <div class= 'row'>
-                                <label for="field{num}">Field</label>
-                                <select class='form-control' name="field{num}">""" +\
-        """<option value="{{None}}" selected></option>""" + options +\
-        """</select>
-                        </div>
-                        <div class= 'row'> """ +\
-        f"""<label for="value{num}">Value</label>
-                            <input type="text" class='form-control' name="value{num}" placeholder="">
-                        </div>
-                    </div>
-                </div>"""
-
-
-def score_bar(value: float, label: str='') -> str:
+def score_bar(value: float, label: str = '') -> str:
     """Score bar in HTML
 
     Args:
@@ -85,6 +67,7 @@ def score_bar(value: float, label: str='') -> str:
                 </div>"""
 
 # ----------------------------- Utilities for sparql queries -----------------------------
+
 
 def pprint(python_dict: dict) -> None:
     """Pretty printer for json objects, only for dev purposes

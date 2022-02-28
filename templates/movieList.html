@@ -33,12 +33,6 @@
                 </div>
             </div>
             <div class="col container" style="height:15%">
-                {% if movie.poster_internal_url %}
-                <img class="img-thumbnail rounded float-left"
-                    style="height:100%;max-width:100%;"
-                    src="{{url_for('static',filename=movie.poster_internal_url)}}"
-                    alt="{{movie.title}}_poster"/>
-                {% endif %}
             </div>
         </div>
         <hr>
