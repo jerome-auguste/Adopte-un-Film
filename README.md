@@ -11,6 +11,30 @@
 In the context of the Reasionning and Knowledge Representation course, we designed a movie request interface using the rdf based database ([Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page)) and made a custom recommender from a selected movie.
 The database is used for more general purposes but we only focused on movies for our project.
 
+## :file_folder: Architecture of the code
+
+```text
+.
+├── app.py                      # Back end script
+├── env.py                      # Environment variables
+├── recommandation.py           # Recommendation class (to integrate multiple recommendation functions)
+├── sparql_queries.py           # All the parametrized SPARQL queries of the project
+├── utils.py                    # Utilities for queries (prefix, formatting...) and back end
+├── static                      # Static media
+│   ├── font-awesome            # Font awesome style files
+│
+├── templates                   # HTML templates to display results
+│   ├── index.html              # Home page
+│   ├── movieList.html          # Search engine
+│   └── recommandations.html    # Recommendation engine
+│
+├── requirements.txt    
+├── LICENSE
+├── .gitignore
+└── README.md
+
+```
+
 ## :runner: Run the code
 
 1. Clone the repo in the destination folder of your choice (or unzip the archive)
