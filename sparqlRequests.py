@@ -291,6 +291,5 @@ def recommendation_inspiredby(film, limit=20):
     return format(sp.query().convert()['results']['bindings'])
 
 
-
-res = recommendation_genre('Q44578', 10)
-pprint(res)
+# res = recommendation_genre('Q44578', 10)
+# pprint(res)
