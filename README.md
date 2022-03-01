@@ -17,11 +17,12 @@ The database is used for more general purposes but we only focused on movies for
 .
 ├── app.py                      # Back end script
 ├── env.py                      # Environment variables
+├── movie.py                    # Handling movie data with a class
 ├── recommandation.py           # Recommendation class (to integrate multiple recommendation functions)
 ├── sparql_queries.py           # All the parametrized SPARQL queries of the project
 ├── utils.py                    # Utilities for queries (prefix, formatting...) and back end
 ├── static                      # Static media
-│   ├── font-awesome            # Font awesome style files
+│   └── font-awesome            # Font awesome style files
 │
 ├── templates                   # HTML templates to display results
 │   ├── index.html              # Home page
