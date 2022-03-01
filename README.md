@@ -3,8 +3,8 @@
 ## :computer: Contributors
 
 - [Jérôme AUGUSTE](https://github.com/jerome-auguste)
-- [Nathan Bruckmann](https://github.com/kim0n0)
-- [Ruben Partouche](https://github.com/rbpart)
+- [Nathan BRUCKMANN](https://github.com/kim0n0)
+- [Ruben PARTOUCHE](https://github.com/rbpart)
 
 ## :page_facing_up: Context and introduction
 
